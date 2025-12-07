@@ -312,6 +312,44 @@ if (productForm) {
   });
 }
 
+// ---- STOCK ADJUST HELPER ----
+async function addStock(productId) {
+  const prod = productCache[productId];
+  const current = prod && typeof prod.stock === "number" ? prod.stock : Number(prod?.stock || 0);
+
+  const input = prompt(
+    `Current stock: ${current || 0}\nKitna stock add kare? (positive number)`,
+    "10"
+  );
+
+  if (input === null) return;
+
+  const delta = Number(input);
+  if (isNaN(delta) || delta === 0) {
+    showToast("Valid number dalo");
+    return;
+  }
+
+  let newStock = (current || 0) + delta;
+  if (newStock < 0) newStock = 0;
+
+  const { error } = await supabaseClient
+    .from("products")
+    .update({ stock: newStock })
+    .eq("id", productId);
+
+  if (error) {
+    console.error("Stock update error", error);
+    showToast("Stock update failed");
+    return;
+  }
+
+  showToast("Stock updated");
+  if (prod) prod.stock = newStock;
+  await loadProducts();
+  await loadHome();
+}
+
 // Load products
 async function loadProducts() {
   const list = document.getElementById("products-list");
@@ -370,14 +408,15 @@ async function loadProducts() {
     actions.className = "product-actions";
 
     // Add to cart button
-    const addBtn = document.createElement("button");
-    addBtn.className = "btn small primary-soft";
-    addBtn.textContent = "Add";
-    addBtn.addEventListener("click", () =>
+    const addBtnCart = document.createElement("button");
+    addBtnCart.className = "btn small primary-soft";
+    addBtnCart.textContent = "Add";
+    addBtnCart.addEventListener("click", () =>
       addToCart({ id: p.id, name: p.name, price: Number(p.price || 0) })
     );
-    actions.appendChild(addBtn);
+    actions.appendChild(addBtnCart);
 
+    // Low stock badge
     const low = (p.stock || 0) <= 5;
     if (low) {
       const lowBadge = document.createElement("span");
@@ -386,13 +425,20 @@ async function loadProducts() {
       actions.appendChild(lowBadge);
     }
 
+    // + Stock button
+    const stockBtn = document.createElement("button");
+    stockBtn.className = "btn small stock-btn";
+    stockBtn.textContent = "+ Stock";
+    stockBtn.addEventListener("click", () => addStock(p.id));
+    actions.appendChild(stockBtn);
+
+    // Delete button
     const delBtn = document.createElement("button");
     delBtn.className = "btn small";
     delBtn.textContent = "Delete";
     delBtn.style.background = "#fee2e2";
     delBtn.style.color = "#b91c1c";
     delBtn.addEventListener("click", () => deleteProduct(p.id));
-
     actions.appendChild(delBtn);
 
     item.appendChild(img);
