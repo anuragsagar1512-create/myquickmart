@@ -116,9 +116,24 @@ h2 {
   cursor: pointer;
 }
 
+.btn.small {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
 .btn.primary {
   background: var(--primary);
   color: #fff;
+}
+
+.btn.primary-soft {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.btn.danger-soft {
+  background: #fee2e2;
+  color: #b91c1c;
 }
 
 .btn.full {
@@ -399,4 +414,80 @@ h2 {
 .manage-subtitle {
   font-size: 12px;
   color: var(--muted);
+}
+
+/* Orders cards with status */
+.order-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.order-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.order-address {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 2px;
+}
+
+.order-actions-row {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* Status badges */
+.status-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid var(--border);
+}
+
+.status-pending {
+  background: #fef9c3;
+  border-color: #facc15;
+  color: #854d0e;
+}
+
+.status-accepted {
+  background: #dcfce7;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+.status-packed {
+  background: #e0f2fe;
+  border-color: #38bdf8;
+  color: #075985;
+}
+
+.status-out_for_delivery {
+  background: #fef3c7;
+  border-color: #fb923c;
+  color: #9a3412;
+}
+
+.status-delivered {
+  background: #ecfdf5;
+  border-color: #22c55e;
+  color: #166534;
+}
+
+.status-cancelled {
+  background: #fee2e2;
+  border-color: #f87171;
+  color: #b91c1c;
 }

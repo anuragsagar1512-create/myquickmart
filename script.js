@@ -10,6 +10,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Toast helper
 function showToast(msg) {
   const el = document.getElementById("toast");
+  if (!el) return;
   el.textContent = msg;
   el.classList.remove("hidden");
   setTimeout(() => el.classList.add("hidden"), 2200);
@@ -212,9 +213,9 @@ async function loadProducts() {
 
     const metaEl = document.createElement("div");
     metaEl.className = "product-meta";
-    const pricePart = `₹${p.price}${p.mrp ? " · MRP ₹" + p.mrp : ""}`;
-    const stockPart = `Stock: ${p.stock} ${p.unit || "pcs"}`;
-    metaEl.textContent = `${pricePart} · ${stockPart}`;
+    const pricePart = "₹" + p.price + (p.mrp ? " · MRP ₹" + p.mrp : "");
+    const stockPart = "Stock: " + p.stock + " " + (p.unit || "pcs");
+    metaEl.textContent = pricePart + " · " + stockPart;
 
     main.appendChild(nameEl);
     main.appendChild(metaEl);
@@ -260,7 +261,73 @@ async function deleteProduct(id) {
   await loadHome();
 }
 
-// Orders
+// ---- ORDER STATUS HELPERS ----
+function prettyStatus(status) {
+  switch (status) {
+    case "PENDING":
+      return "Pending";
+    case "ACCEPTED":
+      return "Accepted";
+    case "PACKED":
+      return "Packed";
+    case "OUT_FOR_DELIVERY":
+      return "Out for delivery";
+    case "DELIVERED":
+      return "Delivered";
+    case "CANCELLED":
+      return "Cancelled";
+    default:
+      return status || "Pending";
+  }
+}
+
+function nextStatus(current) {
+  switch (current) {
+    case "PENDING":
+      return "ACCEPTED";
+    case "ACCEPTED":
+      return "PACKED";
+    case "PACKED":
+      return "OUT_FOR_DELIVERY";
+    case "OUT_FOR_DELIVERY":
+      return "DELIVERED";
+    default:
+      return current;
+  }
+}
+
+function primaryActionLabel(current) {
+  switch (current) {
+    case "PENDING":
+      return "Accept";
+    case "ACCEPTED":
+      return "Mark packed";
+    case "PACKED":
+      return "Out for delivery";
+    case "OUT_FOR_DELIVERY":
+      return "Mark delivered";
+    default:
+      return "";
+  }
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  const { error } = await supabaseClient
+    .from("orders")
+    .update({ status: newStatus })
+    .eq("id", orderId);
+
+  if (error) {
+    console.error("Status update error", error);
+    showToast("Failed to update status");
+    return;
+  }
+  showToast("Status updated");
+  await loadOrders();
+  await loadHome();
+}
+
+// Orders list with status + buttons
 async function loadOrders() {
   const list = document.getElementById("orders-list");
   const empty = document.getElementById("orders-empty");
@@ -287,21 +354,73 @@ async function loadOrders() {
 
   data.forEach((o) => {
     const card = document.createElement("div");
-    card.className = "card";
+    card.className = "card order-card";
+
+    const header = document.createElement("div");
+    header.className = "order-header";
 
     const title = document.createElement("div");
-    title.style.fontWeight = "600";
-    title.textContent = `Order #${o.id}`;
+    title.className = "order-title";
+    const amount = Number(o.total_amount || 0);
+    const pay = o.payment_method || "COD";
+    title.textContent =
+      "Order #" + o.id + " · ₹" + amount.toFixed(0) + " · " + pay.toUpperCase();
+
+    const statusText = document.createElement("span");
+    const status = o.status || "PENDING";
+    statusText.className =
+      "status-badge status-" + status.toLowerCase();
+    statusText.textContent = prettyStatus(status);
+
+    header.appendChild(title);
+    header.appendChild(statusText);
 
     const meta = document.createElement("div");
     meta.className = "product-meta";
     const dt = o.created_at ? new Date(o.created_at).toLocaleString() : "";
-    meta.textContent = `${o.customer_name || "Walk-in"} · ₹${
-      o.total_amount || 0
-    } · ${o.payment_method || "COD"} · ${dt}`;
+    meta.textContent =
+      (o.customer_name || "Customer") +
+      (o.customer_phone ? " · " + o.customer_phone : "") +
+      (dt ? " · " + dt : "");
 
-    card.appendChild(title);
+    card.appendChild(header);
     card.appendChild(meta);
+
+    if (o.customer_address) {
+      const addr = document.createElement("div");
+      addr.className = "order-address";
+      addr.textContent = o.customer_address;
+      card.appendChild(addr);
+    }
+
+    const actionsRow = document.createElement("div");
+    actionsRow.className = "order-actions-row";
+
+    if (status !== "DELIVERED" && status !== "CANCELLED") {
+      const primaryBtn = document.createElement("button");
+      primaryBtn.className = "btn small primary-soft";
+      primaryBtn.textContent = primaryActionLabel(status);
+      primaryBtn.addEventListener("click", () =>
+        updateOrderStatus(o.id, nextStatus(status))
+      );
+      actionsRow.appendChild(primaryBtn);
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.className = "btn small danger-soft";
+      cancelBtn.textContent = "Cancel";
+      cancelBtn.addEventListener("click", () =>
+        updateOrderStatus(o.id, "CANCELLED")
+      );
+      actionsRow.appendChild(cancelBtn);
+    } else {
+      const done = document.createElement("span");
+      done.className = "product-meta";
+      done.textContent =
+        status === "DELIVERED" ? "Completed · Delivered" : "Order cancelled";
+      actionsRow.appendChild(done);
+    }
+
+    card.appendChild(actionsRow);
     list.appendChild(card);
   });
 }
@@ -337,7 +456,7 @@ async function loadHome() {
     lowStockCount = products.filter((p) => (p.stock || 0) <= 5).length;
   }
 
-  saleEl.textContent = "₹" + totalSale;
+  saleEl.textContent = "₹" + totalSale.toFixed(0);
   ordersEl.textContent = String(totalOrders);
   lowEl.textContent = String(lowStockCount);
 }
@@ -369,6 +488,7 @@ if (deliveryForm) {
       customer_address: address,
       payment_method: payment || "cash",
       total_amount,
+      status: "PENDING",
     });
 
     if (error) {
@@ -396,7 +516,7 @@ if (quickBtn) {
   quickBtn.addEventListener("click", async () => {
     const { error } = await supabaseClient
       .from("orders")
-      .insert({ customer_name: "Test", total_amount: 0, payment_method: "COD" });
+      .insert({ customer_name: "Test", total_amount: 0, payment_method: "COD", status: "PENDING" });
     if (error) {
       console.error("Insert order error", error);
       showToast("Failed to create order");
