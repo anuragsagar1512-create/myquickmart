@@ -57,11 +57,27 @@
       <button id="btn-quick-order" class="btn">+ Quick test order</button>
     </section>
 
+    <!-- CART PREVIEW -->
+    <section class="section">
+      <div class="card cart-card">
+        <div class="cart-header">
+          <div>
+            <p class="label">Cart</p>
+            <p class="muted small">Tap items in Catalogue → Add to cart</p>
+          </div>
+          <span class="cart-summary" id="cart-summary">₹0 · 0 items</span>
+        </div>
+        <div id="cart-list" class="list cart-list"></div>
+        <p id="cart-empty" class="muted small">Cart is empty.</p>
+        <button class="btn small danger-soft full" id="cart-clear">Clear cart</button>
+      </div>
+    </section>
+
     <!-- Delivery-style order form -->
     <section class="section">
       <div class="card delivery-card">
         <p class="label">New delivery order</p>
-        <p class="muted small">Save customer name, phone and address like a delivery app.</p>
+        <p class="muted small">Customer name, phone, address + cart total.</p>
 
         <form id="delivery-form" class="form" style="margin-top: 8px;">
           <div class="field-row">

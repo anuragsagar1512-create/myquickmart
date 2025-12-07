@@ -7,6 +7,9 @@ const PRODUCT_BUCKET = "product-images";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ----- CART STATE -----
+let cart = [];
+
 // Toast helper
 function showToast(msg) {
   const el = document.getElementById("toast");
@@ -14,6 +17,123 @@ function showToast(msg) {
   el.textContent = msg;
   el.classList.remove("hidden");
   setTimeout(() => el.classList.add("hidden"), 2200);
+}
+
+function getCartTotal() {
+  return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+}
+
+function getCartCount() {
+  return cart.reduce((sum, item) => sum + item.qty, 0);
+}
+
+function updateCartUI() {
+  const list = document.getElementById("cart-list");
+  const empty = document.getElementById("cart-empty");
+  const summary = document.getElementById("cart-summary");
+  const amountInput = document.getElementById("delivery-amount");
+
+  if (!list || !empty || !summary) return;
+
+  list.innerHTML = "";
+
+  if (cart.length === 0) {
+    empty.style.display = "block";
+    summary.textContent = "₹0 · 0 items";
+  } else {
+    empty.style.display = "none";
+    cart.forEach((item) => {
+      const row = document.createElement("div");
+      row.className = "cart-row";
+
+      const left = document.createElement("div");
+      left.className = "cart-row-left";
+      left.textContent = item.name;
+
+      const right = document.createElement("div");
+      right.className = "cart-row-right";
+
+      const qtyControls = document.createElement("div");
+      qtyControls.className = "qty-controls";
+
+      const minusBtn = document.createElement("button");
+      minusBtn.type = "button";
+      minusBtn.className = "qty-btn";
+      minusBtn.textContent = "−";
+      minusBtn.addEventListener("click", () => changeCartQty(item.id, -1));
+
+      const qtyText = document.createElement("span");
+      qtyText.textContent = item.qty;
+
+      const plusBtn = document.createElement("button");
+      plusBtn.type = "button";
+      plusBtn.className = "qty-btn";
+      plusBtn.textContent = "+";
+      plusBtn.addEventListener("click", () => changeCartQty(item.id, 1));
+
+      qtyControls.appendChild(minusBtn);
+      qtyControls.appendChild(qtyText);
+      qtyControls.appendChild(plusBtn);
+
+      const price = document.createElement("div");
+      price.className = "cart-price";
+      price.textContent = "₹" + (item.price * item.qty).toFixed(0);
+
+      right.appendChild(qtyControls);
+      right.appendChild(price);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      list.appendChild(row);
+    });
+
+    const total = getCartTotal();
+    const count = getCartCount();
+    summary.textContent =
+      "₹" +
+      total.toFixed(0) +
+      " · " +
+      count +
+      " item" +
+      (count > 1 ? "s" : "");
+
+    if (amountInput && (!amountInput.value || Number(amountInput.value) === 0)) {
+      amountInput.value = total.toFixed(0);
+    }
+  }
+}
+
+function addToCart(product) {
+  const existing = cart.find((i) => i.id === product.id);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  showToast("Added to cart");
+  updateCartUI();
+}
+
+function changeCartQty(id, delta) {
+  const item = cart.find((i) => i.id === id);
+  if (!item) return;
+  item.qty += delta;
+  if (item.qty <= 0) {
+    cart = cart.filter((i) => i.id !== id);
+  }
+  updateCartUI();
+}
+
+function clearCart() {
+  cart = [];
+  updateCartUI();
+}
+
+const clearBtn = document.getElementById("cart-clear");
+if (clearBtn) {
+  clearBtn.addEventListener("click", () => {
+    clearCart();
+  });
 }
 
 // Tabs (bottom navigation)
@@ -223,6 +343,15 @@ async function loadProducts() {
     const actions = document.createElement("div");
     actions.className = "product-actions";
 
+    // Add to cart button
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn small primary-soft";
+    addBtn.textContent = "Add";
+    addBtn.addEventListener("click", () =>
+      addToCart({ id: p.id, name: p.name, price: Number(p.price || 0) })
+    );
+    actions.appendChild(addBtn);
+
     const low = (p.stock || 0) <= 5;
     if (low) {
       const lowBadge = document.createElement("span");
@@ -232,7 +361,7 @@ async function loadProducts() {
     }
 
     const delBtn = document.createElement("button");
-    delBtn.className = "btn";
+    delBtn.className = "btn small";
     delBtn.textContent = "Delete";
     delBtn.style.background = "#fee2e2";
     delBtn.style.color = "#b91c1c";
@@ -461,7 +590,7 @@ async function loadHome() {
   lowEl.textContent = String(lowStockCount);
 }
 
-// Delivery-style order form (customer address + payment)
+// Delivery-style order form (customer address + payment + cart total)
 const deliveryForm = document.getElementById("delivery-form");
 if (deliveryForm) {
   deliveryForm.addEventListener("submit", async (e) => {
@@ -472,12 +601,18 @@ if (deliveryForm) {
     const address = document.getElementById("delivery-address").value.trim();
     const payment = document.getElementById("delivery-payment").value;
     const amountRaw = document.getElementById("delivery-amount").value;
-    const total_amount = amountRaw ? Number(amountRaw) : 0;
 
     if (!address) {
       showToast("Please enter delivery address");
       document.getElementById("delivery-address").focus();
       return;
+    }
+
+    let total_amount = amountRaw ? Number(amountRaw) : 0;
+    const cartTotal = getCartTotal();
+
+    if (total_amount === 0 && cartTotal > 0) {
+      total_amount = cartTotal;
     }
 
     const customer_name = name || "Delivery customer";
@@ -499,12 +634,13 @@ if (deliveryForm) {
 
     showToast("Delivery order created");
 
-    // Clear form
+    // Clear form + cart
     document.getElementById("delivery-name").value = "";
     document.getElementById("delivery-phone").value = "";
     document.getElementById("delivery-address").value = "";
     document.getElementById("delivery-amount").value = "";
     document.getElementById("delivery-payment").value = "cash";
+    clearCart();
 
     await Promise.all([loadOrders(), loadHome()]);
   });
@@ -531,4 +667,5 @@ if (quickBtn) {
 // Initial load
 (async function init() {
   await Promise.all([loadProducts(), loadOrders(), loadHome()]);
+  updateCartUI();
 })();

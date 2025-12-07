@@ -146,6 +146,10 @@ h2 {
   gap: 8px;
 }
 
+.cart-list {
+  margin-top: 8px;
+}
+
 .center {
   text-align: center;
 }
@@ -186,6 +190,7 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  align-items: flex-end;
 }
 
 .badge {
@@ -490,4 +495,60 @@ h2 {
   background: #fee2e2;
   border-color: #f87171;
   color: #b91c1c;
+}
+
+/* Cart card */
+.cart-card {
+  margin-top: 4px;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.cart-summary {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.cart-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.cart-row-left {
+  font-size: 13px;
+}
+
+.cart-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  padding: 2px 6px;
+}
+
+.qty-btn {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  padding: 0 4px;
+  cursor: pointer;
+}
+
+.cart-price {
+  font-size: 13px;
+  font-weight: 600;
 }
