@@ -7,8 +7,9 @@ const PRODUCT_BUCKET = "product-images";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// ----- CART STATE -----
+// ----- CART + PRODUCT CACHE -----
 let cart = [];
+let productCache = {}; // id -> product row
 
 // Toast helper
 function showToast(msg) {
@@ -297,6 +298,7 @@ async function loadProducts() {
 
   list.innerHTML = "";
   empty.style.display = "block";
+  productCache = {};
 
   const { data, error } = await supabaseClient
     .from("products")
@@ -314,6 +316,8 @@ async function loadProducts() {
   empty.style.display = "none";
 
   data.forEach((p) => {
+    productCache[p.id] = p;
+
     const item = document.createElement("div");
     item.className = "product-item";
 
@@ -590,6 +594,69 @@ async function loadHome() {
   lowEl.textContent = String(lowStockCount);
 }
 
+// ----- ORDER SAVE + AUTO STOCK REDUCE -----
+async function saveOrderWithCart(payloadOrder) {
+  // 1) Insert into orders and get id back
+  const { data: inserted, error } = await supabaseClient
+    .from("orders")
+    .insert(payloadOrder)
+    .select("id")
+    .limit(1);
+
+  if (error) {
+    console.error("Insert delivery order error", error);
+    showToast("Failed to create delivery order");
+    return false;
+  }
+
+  const orderId = inserted && inserted[0] && inserted[0].id;
+  if (!orderId) {
+    showToast("Order saved but id missing");
+    return false;
+  }
+
+  // 2) If cart has items → insert into order_items table
+  if (cart.length > 0) {
+    const itemsPayload = cart.map((item) => ({
+      order_id: orderId,
+      product_id: item.id,
+      quantity: item.qty,
+      price: item.price,
+    }));
+
+    const { error: itemsError } = await supabaseClient
+      .from("order_items")
+      .insert(itemsPayload);
+
+    if (itemsError) {
+      console.error("Insert order_items error", itemsError);
+      // continue, but show warning
+      showToast("Order saved, but items failed");
+    }
+  }
+
+  // 3) Auto-reduce stock for each product (client-side calculation)
+  for (const item of cart) {
+    const prod = productCache[item.id];
+    const currentStock = prod && typeof prod.stock === "number" ? prod.stock : 0;
+    let newStock = currentStock - item.qty;
+    if (newStock < 0) newStock = 0;
+
+    const { error: stockErr } = await supabaseClient
+      .from("products")
+      .update({ stock: newStock })
+      .eq("id", item.id);
+
+    if (stockErr) {
+      console.error("Stock update error for product", item.id, stockErr);
+    } else if (prod) {
+      prod.stock = newStock;
+    }
+  }
+
+  return true;
+}
+
 // Delivery-style order form (customer address + payment + cart total)
 const deliveryForm = document.getElementById("delivery-form");
 if (deliveryForm) {
@@ -617,7 +684,7 @@ if (deliveryForm) {
 
     const customer_name = name || "Delivery customer";
 
-    const { error } = await supabaseClient.from("orders").insert({
+    const ok = await saveOrderWithCart({
       customer_name,
       customer_phone: phone || null,
       customer_address: address,
@@ -626,11 +693,7 @@ if (deliveryForm) {
       status: "PENDING",
     });
 
-    if (error) {
-      console.error("Insert delivery order error", error);
-      showToast("Failed to create delivery order");
-      return;
-    }
+    if (!ok) return;
 
     showToast("Delivery order created");
 
@@ -642,11 +705,11 @@ if (deliveryForm) {
     document.getElementById("delivery-payment").value = "cash";
     clearCart();
 
-    await Promise.all([loadOrders(), loadHome()]);
+    await Promise.all([loadOrders(), loadProducts(), loadHome()]);
   });
 }
 
-// Quick test order button
+// Quick test order button (no items / no stock change)
 const quickBtn = document.getElementById("btn-quick-order");
 if (quickBtn) {
   quickBtn.addEventListener("click", async () => {
