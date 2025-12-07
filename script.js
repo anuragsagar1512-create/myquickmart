@@ -33,6 +33,8 @@ function updateCartUI() {
   const empty = document.getElementById("cart-empty");
   const summary = document.getElementById("cart-summary");
   const amountInput = document.getElementById("delivery-amount");
+  const floatBtn = document.getElementById("floating-cart");
+  const floatText = document.getElementById("float-cart-text");
 
   if (!list || !empty || !summary) return;
 
@@ -41,6 +43,7 @@ function updateCartUI() {
   if (cart.length === 0) {
     empty.style.display = "block";
     summary.textContent = "₹0 · 0 items";
+    if (floatBtn) floatBtn.classList.add("hidden");
   } else {
     empty.style.display = "none";
     cart.forEach((item) => {
@@ -90,13 +93,19 @@ function updateCartUI() {
 
     const total = getCartTotal();
     const count = getCartCount();
-    summary.textContent =
+    const label =
       "₹" +
       total.toFixed(0) +
       " · " +
       count +
       " item" +
       (count > 1 ? "s" : "");
+    summary.textContent = label;
+
+    if (floatBtn && floatText) {
+      floatBtn.classList.remove("hidden");
+      floatText.textContent = label;
+    }
 
     if (amountInput && (!amountInput.value || Number(amountInput.value) === 0)) {
       amountInput.value = total.toFixed(0);
@@ -134,6 +143,19 @@ const clearBtn = document.getElementById("cart-clear");
 if (clearBtn) {
   clearBtn.addEventListener("click", () => {
     clearCart();
+  });
+}
+
+// Floating cart click → open Orders tab + scroll
+const floatingCartBtn = document.getElementById("floating-cart");
+if (floatingCartBtn) {
+  floatingCartBtn.addEventListener("click", () => {
+    const ordersTabBtn = document.querySelector('.tab-btn[data-tab="orders"]');
+    if (ordersTabBtn) ordersTabBtn.click();
+    const cartCard = document.querySelector(".cart-card");
+    if (cartCard) {
+      cartCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   });
 }
 

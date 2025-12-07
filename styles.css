@@ -552,3 +552,25 @@ h2 {
   font-size: 13px;
   font-weight: 600;
 }
+
+/* Floating cart button */
+.floating-cart {
+  position: fixed;
+  right: 12px;
+  bottom: 80px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 13px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.4);
+  z-index: 25;
+}
+
+.floating-cart-icon {
+  font-size: 16px;
+}
