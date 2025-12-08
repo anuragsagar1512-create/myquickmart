@@ -2,101 +2,287 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>My Quick Mart</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}
-    body{background:#f5f5fb;color:#111827;}
-    .screen{min-height:100vh;padding:12px 12px 72px;position:relative;}
-    .header{margin-top:8px;margin-bottom:16px;}
-    .header-title{font-size:22px;font-weight:700;display:flex;align-items:center;gap:8px;}
-    .header-title span.icon{font-size:22px;}
-    .header-subtitle{margin-top:2px;font-size:13px;color:#6b7280;}
-    .section-title{font-size:20px;font-weight:700;margin:10px 0;}
-    .card-list{display:flex;flex-direction:column;gap:8px;}
-    .card{background:#fff;border-radius:16px;padding:12px 14px;display:flex;align-items:center;
-      box-shadow:0 1px 3px rgba(15,23,42,0.08);}
-    .card-icon{font-size:22px;margin-right:10px;}
-    .card-text-main{font-size:16px;font-weight:600;}
-    .card-text-sub{font-size:13px;color:#6b7280;margin-top:2px;}
-
-    .cart-fab{position:fixed;right:16px;bottom:78px;background:#020617;color:#fff;border-radius:999px;
-      padding:8px 14px;display:flex;align-items:center;gap:6px;font-size:13px;
-      box-shadow:0 8px 18px rgba(15,23,42,0.35);border:none;}
-    .cart-fab span.cart-icon{font-size:18px;}
-
-    .bottom-nav{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #e5e7eb;
-      height:60px;display:flex;justify-content:space-around;align-items:center;z-index:10;}
-    .nav-item{display:flex;flex-direction:column;align-items:center;font-size:11px;
-      color:#6b7280;text-decoration:none;gap:2px;cursor:pointer;}
-    .nav-item .nav-icon{font-size:18px;}
-    .nav-item.active{color:#f97316;font-weight:600;}
-
-    .page{display:none;}
-    .page.active{display:block;}
-
-    @media (min-width:520px){
-      .screen{max-width:480px;margin:0 auto;}
-      .bottom-nav{max-width:480px;margin:0 auto;left:50%;transform:translateX(-50%);
-        border-radius:18px 18px 0 0;}
-      .cart-fab{right:calc(50% - 224px + 16px);}
-    }
-  </style>
+  <title>My Quick Mart – POS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-
-  <div id="page-home" class="screen page">
-    <header class="header">
-      <div class="header-title"><span class="icon">🛒</span><span>My Quick Mart</span></div>
-      <p class="header-subtitle">Realtime dashboard + simple POS</p>
-    </header>
-    <div><p>Welcome to <b>My Quick Mart</b>.</p></div>
-  </div>
-
-  <div id="page-manage" class="screen page active">
-    <header class="header">
-      <div class="header-title"><span class="icon">🛒</span><span>My Quick Mart</span></div>
-      <p class="header-subtitle">Realtime dashboard + simple POS</p>
-    </header>
-    <h2 class="section-title">Manage</h2>
-
-    <div class="card-list">
-      <div class="card"><div class="card-icon">📅</div><div><div class="card-text-main">Store details</div><div class="card-text-sub">Store name, address & contact</div></div></div>
-      <div class="card"><div class="card-icon">💳</div><div><div class="card-text-main">Payment methods</div><div class="card-text-sub">Cash, UPI & bank details</div></div></div>
-      <div class="card"><div class="card-icon">🚚</div><div><div class="card-text-main">Delivery settings</div><div class="card-text-sub">Radius, fees & timings</div></div></div>
-      <div class="card"><div class="card-icon">🛡️</div><div><div class="card-text-main">KYC & verification</div><div class="card-text-sub">Basic business verification</div></div></div>
+  <header class="app-header">
+    <div class="title">
+      <span class="logo">🛒</span>
+      <div>
+        <h1>My Quick Mart</h1>
+        <p class="muted small">Realtime dashboard + simple POS</p>
+      </div>
     </div>
+  </header>
 
-    <button class="cart-fab"><span class="cart-icon">🛒</span><span>₹0 · 0</span></button>
-  </div>
+  <!-- HOME -->
+  <main class="tab-page" id="tab-home">
+    <section class="section">
+      <h2>Business summary</h2>
+      <p class="muted small">Data from Supabase (orders + products)</p>
+      <div class="grid">
+        <div class="card">
+          <p class="label">Total sale</p>
+          <p class="value" id="total-sale">₹0</p>
+        </div>
+        <div class="card">
+          <p class="label">Orders</p>
+          <p class="value" id="total-orders">0</p>
+        </div>
+        <div class="card">
+          <p class="label">Low stock</p>
+          <p class="value" id="low-stock">0</p>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <nav class="bottom-nav">
-    <div class="nav-item" data-target="home"><span class="nav-icon">🏠</span><span>Home</span></div>
-    <div class="nav-item" data-target="invoice"><span class="nav-icon">🧾</span><span>Invoice</span></div>
-    <div class="nav-item" data-target="orders"><span class="nav-icon">🛍️</span><span>Orders</span></div>
-    <div class="nav-item" data-target="catalogue"><span class="nav-icon">📦</span><span>Catalogue</span></div>
-    <div class="nav-item active" data-target="manage"><span class="nav-icon">⚙️</span><span>Manage</span></div>
+  <!-- INVOICE TAB (info) -->
+  <main class="tab-page" id="tab-invoice">
+    <section class="section">
+      <h2>Invoice</h2>
+      <p class="muted small">Go to Orders tab → tap <b>Print</b> on any order to generate a printable invoice.</p>
+      <div class="card">
+        <p class="muted small">
+          Invoice print is optimised for thermal / A4 printers. Use your browser's print menu to save as PDF or print.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <!-- ORDERS -->
+  <main class="tab-page" id="tab-orders">
+    <section class="section header-row">
+      <h2>Orders</h2>
+      <button id="btn-quick-order" class="btn">+ Quick test order</button>
+    </section>
+
+    <!-- CART PREVIEW -->
+    <section class="section">
+      <div class="card cart-card">
+        <div class="cart-header">
+          <div>
+            <p class="label">Cart</p>
+            <p class="muted small">Tap items in Catalogue → Add to cart</p>
+          </div>
+          <span class="cart-summary" id="cart-summary">₹0 · 0 items</span>
+        </div>
+        <div id="cart-list" class="list cart-list"></div>
+        <p id="cart-empty" class="muted small">Cart is empty.</p>
+        <button class="btn small danger-soft full" id="cart-clear">Clear cart</button>
+      </div>
+    </section>
+
+    <!-- Delivery-style order form -->
+    <section class="section">
+      <div class="card delivery-card">
+        <p class="label">New delivery order</p>
+        <p class="muted small">Customer name, phone, address + cart total. Stock auto-reduces after order.</p>
+
+        <form id="delivery-form" class="form" style="margin-top: 8px;">
+          <div class="field-row">
+            <label class="field">
+              <span>Customer name</span>
+              <input type="text" id="delivery-name" placeholder="e.g. Rahul Verma" />
+            </label>
+            <label class="field">
+              <span>Phone</span>
+              <input type="tel" id="delivery-phone" inputmode="tel" placeholder="10-digit mobile" />
+            </label>
+          </div>
+
+          <label class="field">
+            <span>Delivery address</span>
+            <textarea id="delivery-address" rows="2" placeholder="House no, street, area, landmark"></textarea>
+          </label>
+
+          <div class="field-row">
+            <label class="field">
+              <span>Payment method</span>
+              <select id="delivery-payment">
+                <option value="cash">Cash</option>
+                <option value="upi">UPI</option>
+                <option value="card">Card</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Order total (₹)</span>
+              <input type="number" id="delivery-amount" min="0" step="1" placeholder="0" />
+            </label>
+          </div>
+
+          <button type="submit" class="btn primary full" style="margin-top: 6px;">
+            Create delivery order
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <section class="section">
+      <div id="orders-list" class="list"></div>
+      <p id="orders-empty" class="muted center small">No orders yet.</p>
+    </section>
+  </main>
+
+  <!-- CATALOGUE -->
+  <main class="tab-page" id="tab-catalogue">
+    <section class="section header-row">
+      <h2>Catalogue</h2>
+      <button id="btn-open-product" class="btn primary">+ Add product</button>
+    </section>
+    <section class="section">
+      <div id="products-list" class="list"></div>
+      <p id="products-empty" class="muted center small">No products yet. Add one.</p>
+    </section>
+  </main>
+
+  <!-- MANAGE -->
+  <main class="tab-page active" id="tab-manage">
+    <section class="section">
+      <h2>Manage</h2>
+      <div class="manage-list">
+        <button class="manage-item">
+          <span class="manage-icon">🏪</span>
+          <span class="manage-text">
+            <span class="manage-title">Store details</span>
+            <span class="manage-subtitle">Store name, address & contact</span>
+          </span>
+        </button>
+        <button class="manage-item">
+          <span class="manage-icon">💳</span>
+          <span class="manage-text">
+            <span class="manage-title">Payment methods</span>
+            <span class="manage-subtitle">Cash, UPI & bank details</span>
+          </span>
+        </button>
+        <button class="manage-item">
+          <span class="manage-icon">🛵</span>
+          <span class="manage-text">
+            <span class="manage-title">Delivery settings</span>
+            <span class="manage-subtitle">Radius, fees & timings</span>
+          </span>
+        </button>
+        <button class="manage-item">
+          <span class="manage-icon">🛡️</span>
+          <span class="manage-text">
+            <span class="manage-title">KYC & verification</span>
+            <span class="manage-subtitle">Basic business verification</span>
+          </span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- FLOATING CART BUTTON -->
+  <button id="floating-cart" class="floating-cart hidden">
+    <span class="floating-cart-icon">🛒</span>
+    <span id="float-cart-text">₹0 · 0</span>
+  </button>
+
+  <!-- PRINT INVOICE ROOT (only visible when printing) -->
+  <div id="print-root" class="print-root"></div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="tabs bottom-tabs">
+    <button class="tab-btn" data-tab="home">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">Home</span>
+    </button>
+    <button class="tab-btn" data-tab="invoice">
+      <span class="tab-icon">🧾</span>
+      <span class="tab-label">Invoice</span>
+    </button>
+    <button class="tab-btn" data-tab="orders">
+      <span class="tab-icon">🛍</span>
+      <span class="tab-label">Orders</span>
+    </button>
+    <button class="tab-btn" data-tab="catalogue">
+      <span class="tab-icon">📦</span>
+      <span class="tab-label">Catalogue</span>
+    </button>
+    <button class="tab-btn active" data-tab="manage">
+      <span class="tab-icon">⚙️</span>
+      <span class="tab-label">Manage</span>
+    </button>
   </nav>
 
-  <script>
-    const pages={
-      home:document.getElementById('page-home'),
-      manage:document.getElementById('page-manage'),
-      invoice:document.getElementById('page-home'),
-      orders:document.getElementById('page-home'),
-      catalogue:document.getElementById('page-home'),
-    };
-    const nav=document.querySelectorAll('.nav-item');
-    nav.forEach(n=>{
-      n.onclick=()=>{
-        let t=n.dataset.target;
-        document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-        pages[t].classList.add('active');
-        nav.forEach(x=>x.classList.remove('active'));
-        n.classList.add('active');
-      };
-    });
-  </script>
+  <!-- ADD PRODUCT MODAL -->
+  <div class="backdrop hidden" id="product-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Add product</h3>
+        <button class="icon-btn" id="product-close">✕</button>
+      </div>
+      <form id="product-form" class="form">
+        <div class="image-row">
+          <label for="product-image" class="image-box">
+            <span id="image-label">Choose photo</span>
+            <img id="image-preview" alt="Preview" class="hidden" />
+          </label>
+          <input type="file" id="product-image" accept="image/*" hidden />
+        </div>
 
+        <label class="field">
+          <span>Name*</span>
+          <input type="text" id="product-name" required />
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Sale price*</span>
+            <input type="number" id="product-price" min="0" required />
+          </label>
+          <label class="field">
+            <span>MRP</span>
+            <input type="number" id="product-mrp" min="0" />
+          </label>
+        </div>
+
+        <label class="field">
+          <span>Category</span>
+          <input type="text" id="product-category" placeholder="Snacks, Grocery…" />
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Quantity (stock)</span>
+            <input type="number" id="product-stock" min="0" value="0" />
+          </label>
+          <label class="field">
+            <span>Unit</span>
+            <select id="product-unit">
+              <option value="Pieces">Pieces</option>
+              <option value="Kg">Kg</option>
+              <option value="Gram">Gram</option>
+              <option value="Litre">Litre</option>
+              <option value="Pack">Pack</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Color</span>
+            <input type="text" id="product-color" />
+          </label>
+          <label class="field">
+            <span>Size</span>
+            <input type="text" id="product-size" />
+          </label>
+        </div>
+
+        <div id="product-error" class="error hidden"></div>
+
+        <button class="btn primary full" type="submit" id="product-save">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="script.js"></script>
 </body>
 </html>
