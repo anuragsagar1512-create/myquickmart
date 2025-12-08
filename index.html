@@ -39,13 +39,15 @@
     </section>
   </main>
 
-  <!-- INVOICE (placeholder) -->
+  <!-- INVOICE TAB (info) -->
   <main class="tab-page" id="tab-invoice">
     <section class="section">
       <h2>Invoice</h2>
-      <p class="muted small">Create a quick manual invoice for walk-in customers.</p>
+      <p class="muted small">Go to Orders tab → tap <b>Print</b> on any order to generate a printable invoice.</p>
       <div class="card">
-        <p class="muted small">Invoice module coming soon. You can still track totals from the Orders tab.</p>
+        <p class="muted small">
+          Invoice print is optimised for thermal / A4 printers. Use your browser's print menu to save as PDF or print.
+        </p>
       </div>
     </section>
   </main>
@@ -178,6 +180,9 @@
     <span class="floating-cart-icon">🛒</span>
     <span id="float-cart-text">₹0 · 0</span>
   </button>
+
+  <!-- PRINT INVOICE ROOT (only visible when printing) -->
+  <div id="print-root" class="print-root"></div>
 
   <!-- BOTTOM NAVIGATION -->
   <nav class="tabs bottom-tabs">

@@ -451,6 +451,7 @@ h2 {
   display: flex;
   gap: 6px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 /* Status badges */
@@ -578,4 +579,109 @@ h2 {
 .stock-btn {
   background: #e0f2fe;
   color: #0369a1;
+}
+
+/* PRINT INVOICE */
+.print-root {
+  display: none;
+}
+
+.invoice {
+  max-width: 600px;
+  margin: 0 auto;
+  font-size: 13px;
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+.invoice-header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.invoice-meta p {
+  margin: 0;
+  font-size: 12px;
+}
+
+.invoice-section {
+  margin-bottom: 8px;
+}
+
+.invoice-section h2 {
+  font-size: 14px;
+  margin: 0 0 4px;
+}
+
+.invoice-section p {
+  margin: 0 0 2px;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 4px;
+}
+
+.invoice-table th,
+.invoice-table td {
+  border: 1px solid #e5e7eb;
+  padding: 4px 6px;
+  text-align: left;
+  font-size: 12px;
+}
+
+.invoice-table th {
+  background: #f3f4f6;
+}
+
+.invoice-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.invoice-total h2 {
+  margin: 0;
+}
+
+.invoice-total p {
+  margin: 0 0 2px;
+  font-size: 12px;
+}
+
+.invoice-note {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 12px;
+}
+
+/* Print styles */
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  .app-header,
+  .tab-page,
+  .tabs.bottom-tabs,
+  .floating-cart,
+  .toast,
+  .backdrop {
+    display: none !important;
+  }
+
+  .print-root {
+    display: block;
+    padding: 16px;
+  }
 }

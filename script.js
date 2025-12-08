@@ -528,7 +528,115 @@ async function updateOrderStatus(orderId, newStatus) {
   await loadHome();
 }
 
-// Orders list with status + buttons
+// ----- PRINT INVOICE -----
+async function printInvoice(order) {
+  const root = document.getElementById("print-root");
+  if (!root) return;
+
+  // Fetch order_items for this order
+  let items = [];
+  const { data, error } = await supabaseClient
+    .from("order_items")
+    .select("*")
+    .eq("order_id", order.id);
+
+  if (!error && data) {
+    items = data;
+  }
+
+  const created =
+    order.created_at ? new Date(order.created_at).toLocaleString() : "";
+
+  let rowsHtml = "";
+  let grandTotal = 0;
+
+  if (items.length > 0) {
+    items.forEach((it, idx) => {
+      const prod = productCache[it.product_id];
+      const name = prod?.name || `Item ${it.product_id}`;
+      const qty = Number(it.quantity || 0);
+      const price = Number(it.price || 0);
+      const lineTotal = qty * price;
+      grandTotal += lineTotal;
+      rowsHtml += `<tr>
+        <td>${idx + 1}</td>
+        <td>${name}</td>
+        <td>${qty}</td>
+        <td>₹${price.toFixed(2)}</td>
+        <td>₹${lineTotal.toFixed(2)}</td>
+      </tr>`;
+    });
+  } else {
+    // fallback if no items stored
+    const total = Number(order.total_amount || 0);
+    grandTotal = total;
+    rowsHtml = `<tr>
+      <td>1</td>
+      <td>Order total</td>
+      <td>-</td>
+      <td>-</td>
+      <td>₹${total.toFixed(2)}</td>
+    </tr>`;
+  }
+
+  const amountDisplay =
+    grandTotal > 0 ? grandTotal.toFixed(2) : Number(order.total_amount || 0).toFixed(2);
+
+  root.innerHTML = `
+    <div class="invoice">
+      <div class="invoice-header">
+        <div>
+          <h1>My Quick Mart</h1>
+          <p>Simple POS + Delivery</p>
+        </div>
+        <div class="invoice-meta">
+          <p><strong>Invoice #</strong> ${order.id}</p>
+          <p><strong>Date</strong> ${created}</p>
+        </div>
+      </div>
+
+      <div class="invoice-section">
+        <h2>Bill to</h2>
+        <p><strong>${order.customer_name || "Customer"}</strong></p>
+        ${order.customer_phone ? `<p>Phone: ${order.customer_phone}</p>` : ""}
+        ${order.customer_address ? `<p>Address: ${order.customer_address}</p>` : ""}
+      </div>
+
+      <div class="invoice-section">
+        <table class="invoice-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="invoice-footer">
+        <div>
+          <p>Payment method: <strong>${(order.payment_method || "cash").toUpperCase()}</strong></p>
+        </div>
+        <div class="invoice-total">
+          <p>Grand total</p>
+          <h2>₹${amountDisplay}</h2>
+        </div>
+      </div>
+
+      <p class="invoice-note">Thank you for shopping with us!</p>
+    </div>
+  `;
+
+  window.print();
+}
+
+// Orders list with status + buttons + print
 async function loadOrders() {
   const list = document.getElementById("orders-list");
   const empty = document.getElementById("orders-empty");
@@ -620,6 +728,13 @@ async function loadOrders() {
         status === "DELIVERED" ? "Completed · Delivered" : "Order cancelled";
       actionsRow.appendChild(done);
     }
+
+    // Print button
+    const printBtn = document.createElement("button");
+    printBtn.className = "btn small";
+    printBtn.textContent = "Print";
+    printBtn.addEventListener("click", () => printInvoice(o));
+    actionsRow.appendChild(printBtn);
 
     card.appendChild(actionsRow);
     list.appendChild(card);
