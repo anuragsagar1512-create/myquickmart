@@ -2,78 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manage</title>
-  <link rel="stylesheet" href="styles.css" />
+  <title>My Quick Mart – Manage</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui; }
+    body { background: #f5f5fb; color: #111827; }
+    .screen { min-height: 100vh; padding: 12px 12px 72px; }
+    .header { margin-top: 8px; margin-bottom: 16px; }
+    .header-title { font-size: 22px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .header-subtitle { font-size: 13px; color: #6b7280; }
+    .section-title { font-size: 20px; font-weight: 700; margin: 10px 0; }
+    .card-list { display: flex; flex-direction: column; gap: 8px; }
+    .card { background: #fff; border-radius: 16px; padding: 12px 14px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .card-icon { font-size: 22px; margin-right: 10px; }
+    .card-text-main { font-size: 16px; font-weight: 600; }
+    .card-text-sub { font-size: 13px; color: #6b7280; }
+    .cart-fab { position: fixed; right: 16px; bottom: 78px; background: #020617; color: white; border-radius: 999px; padding: 8px 14px; display: flex; gap: 6px; }
+    .bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1px solid #e5e7eb; height: 60px; display: flex; justify-content: space-around; align-items: center; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #6b7280; }
+    .nav-item.active { color: #f97316; font-weight: 600; }
+  </style>
 </head>
 <body>
-<div class="app-shell">
-  <header class="app-header">
-    <div class="app-header-logo">🛒</div>
-    <div class="app-header-title">
-      <h1>My Quick Mart</h1>
-      <span>Realtime dashboard + simple POS</span>
-    </div>
-  </header>
-  <main class="app-main">
-
+  <div class="screen">
+    <header class="header">
+      <div class="header-title">🛒 My Quick Mart</div>
+      <p class="header-subtitle">Realtime dashboard + simple POS</p>
+    </header>
     <h2 class="section-title">Manage</h2>
-
-    <div class="manage-card" id="btn-store-details">
-      <div class="manage-icon">🏬</div>
-      <div class="manage-text">
-        <h3>Store details</h3>
-        <p>Store name, address &amp; contact</p>
-      </div>
+    <div class="card-list">
+      <div class="card"><div class="card-icon">📅</div><div><div class="card-text-main">Store details</div><div class="card-text-sub">Store name, address & contact</div></div></div>
+      <div class="card"><div class="card-icon">💳</div><div><div class="card-text-main">Payment methods</div><div class="card-text-sub">Cash, UPI & bank details</div></div></div>
+      <div class="card"><div class="card-icon">🚚</div><div><div class="card-text-main">Delivery settings</div><div class="card-text-sub">Radius, fees & timings</div></div></div>
+      <div class="card"><div class="card-icon">🛡️</div><div><div class="card-text-main">KYC & verification</div><div class="card-text-sub">Basic business verification</div></div></div>
     </div>
-
-    <div class="manage-card" id="btn-payment-methods">
-      <div class="manage-icon">💳</div>
-      <div class="manage-text">
-        <h3>Payment methods</h3>
-        <p>Cash, UPI &amp; bank details</p>
-      </div>
-    </div>
-
-    <div class="manage-card" id="btn-delivery-settings">
-      <div class="manage-icon">🚚</div>
-      <div class="manage-text">
-        <h3>Delivery settings</h3>
-        <p>Radius, fees &amp; timings</p>
-      </div>
-    </div>
-
-    <div class="manage-card" id="btn-kyc">
-      <div class="manage-icon">🛡️</div>
-      <div class="manage-text">
-        <h3>KYC &amp; verification</h3>
-        <p>Basic business verification</p>
-      </div>
-    </div>
-
-  </main>
+    <button class="cart-fab">🛒 ₹0 · 0</button>
+  </div>
   <nav class="bottom-nav">
-    <a href="index.html" class="bottom-nav-item" id="nav-home">
-      <div>🏠</div><span>Home</span>
-    </a>
-    <a href="invoice.html" class="bottom-nav-item" id="nav-invoice">
-      <div>🧾</div><span>Invoice</span>
-    </a>
-    <a href="orders.html" class="bottom-nav-item" id="nav-orders">
-      <div>🛍️</div><span>Orders</span>
-    </a>
-    <a href="catalogue.html" class="bottom-nav-item" id="nav-catalogue">
-      <div>📦</div><span>Catalogue</span>
-    </a>
-    <a href="manage.html" class="bottom-nav-item" id="nav-manage">
-      <div>⚙️</div><span>Manage</span>
-    </a>
+    <div class="nav-item">🏠<span>Home</span></div>
+    <div class="nav-item">🧾<span>Invoice</span></div>
+    <div class="nav-item">🛍️<span>Orders</span></div>
+    <div class="nav-item">📦<span>Catalogue</span></div>
+    <div class="nav-item active">⚙️<span>Manage</span></div>
   </nav>
-</div>
-<div class="float-cart">
-  <div class="float-cart-icon">🛒</div>
-  <div>₹0 · 0</div>
-</div>
-<script src="app.js"></script>
 </body>
 </html>
