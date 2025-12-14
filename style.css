@@ -1,3 +1,5 @@
 
-body{font-family:Arial;background:#eef}
-button{background:#2ecc71;color:#fff;border:none;padding:8px 14px;border-radius:6px}
+body{font-family:Arial;background:#f6f6ff;margin:0}
+header{background:#6c2bd9;color:#fff;padding:15px;font-size:20px}
+.card{background:#fff;margin:10px;padding:10px;border-radius:10px}
+button{background:#6c2bd9;color:#fff;border:none;padding:8px;border-radius:6px}
